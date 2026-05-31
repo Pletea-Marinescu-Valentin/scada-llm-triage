@@ -55,6 +55,13 @@ def load_batch(z, scada_path, gt_path, is_attack):
             out[nc] = s[c].to_numpy()
     df = pd.DataFrame(out)
     df["ATT_FLAG"] = att
+    cont = [c for c in df.columns if c not in ("DATETIME", "ATT_FLAG") and not c.startswith("S_")]
+    ref = df.loc[df["ATT_FLAG"] == 0, cont]
+    if len(ref) < 30:
+        ref = df[cont]
+    mu = ref.mean()
+    sd = ref.std().replace(0, 1.0)
+    df[cont] = (df[cont] - mu) / sd
     return df
 
 
